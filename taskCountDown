@@ -1,1 +1,201 @@
 
+class Countdown {
+  /**
+   * 构造函数
+   * @param {Object} params - 倒计时的配置参数
+   * @param {HTMLElement} container - 倒计时显示的容器元素
+   */
+  constructor(params = {}, container) {
+    // 单例模式，确保只有一个实例存在
+    if (Countdown.instance) {
+      return Countdown.instance;
+    }
+    Countdown.instance = this;
+    this.params = params;
+    this.seconds = params.seconds;
+    this.container = container;
+    this.interval = null;
+    this.finish = params.finish;
+    this.top = params.top;
+    this.bottom = params.bottom;
+    this.left = params.left;
+    this.right = params.right;
+    // 创建 DOM 元素
+    this.createElements();
+  }
+
+  /**
+   * 倒计时完成时调用
+   * 执行自定义的完成函数或默认行为
+   */
+  countDownfinish() {
+    //有自定义，则执行自定义函数，否则用默认的
+    if (this.finish) {
+      this.finish();
+    } else {
+      //调用IF096184
+    }
+  }
+  /**
+   * 创建倒计时所需的DOM元素
+   * 包括倒计时的容器、环形进度条、倒计时数字等
+   */
+  createElements() {
+    // 容器
+    // this.container.style.display = 'flex';
+    // this.container.style.justifyContent = 'center';
+    // this.container.style.alignItems = 'center';
+    // this.container.style.height = '100vh';
+    // 最外层容器
+    this.boxContainer = document.createElement("div");
+    this.boxContainer.style.display = "inline-block";
+    this.boxContainer.style.width = "80px";
+    this.boxContainer.style.height = "80px";
+
+    this.boxContainer.style.position = "fixed";
+    this.boxContainer.style.right = this.right;
+    this.boxContainer.style.bottom = this.bottom;
+    this.boxContainer.style.top = this.top;
+    this.boxContainer.style.left = this.left;
+    this.boxContainer.style.background = "transparent";
+    // this.boxContainer.style.background = "#ccc";
+    this.boxContainer.style.zIndex = "2";
+
+    // 环形进度条容器
+    this.circleContainer = document.createElement("div");
+    this.circleContainer.style.width = "61px";
+    this.circleContainer.style.height = "61px";
+    this.circleContainer.style.position = "absolute";
+    this.circleContainer.style.right = "5px";
+    // this.circleContainer.style.bottom = "0";
+    // this.circleContainer.style.margin = '0 auto';
+    this.circleContainer.style.borderRadius = "50%";
+    this.circleContainer.style.background = "conic-gradient(#FFC93A 0%, #FFC93A 100%)";
+    this.circleContainer.style.zIndex = "3";
+
+    // 中间的白色圆形
+    const innerCircle = document.createElement("div");
+    innerCircle.style.width = "90%";
+    innerCircle.style.height = "90%";
+    innerCircle.style.position = "absolute";
+    innerCircle.style.top = "5%";
+    innerCircle.style.left = "5%";
+    innerCircle.style.borderRadius = "50%";
+    innerCircle.style.background = "white";
+
+    // 底部文案区域
+    this.BottomTextElement = document.createElement("div");
+    this.BottomTextElement.style.background = "#D8E2F3";
+    this.BottomTextElement.style.position = "absolute";
+    this.BottomTextElement.style.right = "3px";
+    this.BottomTextElement.style.bottom = "3px";
+    this.BottomTextElement.style.borderRadius = "10px";
+    this.BottomTextElement.style.padding = "2px 15px 2px 15px";
+    this.BottomTextElement.style.border = "1px solid #D8E2F3";
+    this.BottomTextElement.style.fontSize = "12px";
+    this.BottomTextElement.style.fontWeight = "bold";
+    this.BottomTextElement.style.color = "#4D5054";
+    this.BottomTextElement.textContent = "浏览中";
+    this.BottomTextElement.style.zIndex = "50";
+
+    // 倒计时文本
+    this.textElement = document.createElement("div");
+    this.textElement.style.position = "absolute";
+    this.textElement.style.top = "30%";
+    this.textElement.style.left = "28%";
+    this.textElement.style.fontSize = "1.1rem";
+    this.textElement.style.fontWeight = "bold";
+    this.textElement.style.color = "#DC5D2E";
+    this.textElement.textContent = this.seconds + "s";
+
+    // 组装元素
+    this.circleContainer.appendChild(innerCircle);
+    this.circleContainer.appendChild(this.textElement);
+    this.boxContainer.appendChild(this.BottomTextElement);
+    this.boxContainer.appendChild(this.circleContainer);
+    this.container.appendChild(this.boxContainer);
+  }
+
+  /**
+   * 开始倒计时
+   * 如果倒计时已经开始，则不执行任何操作
+   */
+  start() {
+    if (this.interval) return; // 防止重复启动
+    this.interval = setInterval(() => this.update(), 1000);
+  }
+
+  /**
+   * 更新倒计时状态
+   * 每秒更新倒计时数字和进度条，倒计时结束时调用完成函数
+   */
+  update() {
+    if (this.seconds > 0) {
+      this.seconds--;
+      this.textElement.textContent = this.seconds>=10?this.seconds + "s":this.seconds +" s";;
+      const percent = ((this.params.seconds - this.seconds) / this.params.seconds) * 100;
+      this.circleContainer.style.background = `conic-gradient(#FFC93A ${percent}%, #e0e0e0 ${percent}% 100%)`;
+    } else {
+      this.stop();
+      this.textElement.textContent = "0 s";
+      this.BottomTextElement.textContent = "任务完成";
+      this.BottomTextElement.style.padding = "2px 10px 2px 10px";
+     
+      // 执行倒计时完成时的回调
+      this.countDownfinish();
+    }
+  }
+
+  /**
+   * 停止倒计时
+   * 清除倒计时的定时器
+   */
+  stop() {
+    clearInterval(this.interval);
+    this.interval = null;
+  }
+
+  /**
+   * 重置倒计时
+   * 停止当前倒计时并恢复到初始状态
+   */
+  reset() {
+    this.stop();
+    this.seconds = this.params.seconds;
+    this.textElement.textContent = this.seconds;
+    this.circleContainer.style.background = "conic-gradient(#FFC93A 0%, #FFC93A 100%)";
+  }
+}
+
+// 使用 
+// 引入
+<script src='./allDayArticleFtl/js/taskCountDown.js'></script>;
+// 初始化
+// 初始化单例
+const container = document.body;
+// 创建倒计时实例，设置倒计时参数和回调函数
+const countdown = new Countdown(
+  {
+    // 倒计时总秒数
+    seconds: 30,
+    // 倒计时结束时的回调函数
+    finish: () => {
+      // 打印倒计时结束的日志
+      console.log(`%c ==当前  任务完成了==>`, "background: green; color: white");
+    },
+    // 倒计时显示框的位置
+    top: "",
+    bottom: "180px",
+    left: "",
+    right: "30px",
+  },
+  // 倒计时显示的容器
+  container
+);
+
+// 启动倒计时
+countdown.start();
+
+// 如果需要重置倒计时，可以调用：
+// countdown.reset();
+// countdown.start();
