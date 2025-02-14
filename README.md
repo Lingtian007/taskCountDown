@@ -1,5 +1,5 @@
-# taskCountDown
-
+# 基于Js单例模式实现仿支付宝活动 倒计时任务悬浮球
+## taskCountDown
 
 ```js
 // 引入
